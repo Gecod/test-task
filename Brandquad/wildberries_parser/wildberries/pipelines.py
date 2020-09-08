@@ -12,28 +12,26 @@ import json
 class WildberriesPipeline:
     def __init__(self):
         self.f = open('wildberries.json', 'a', encoding='utf-8')
+        self.f.write('[')
 
     def add_to_json(self, product):
         self.f.write(json.dumps(product, indent=2, ensure_ascii=False))
-        # self.f.write(str(product))
-        # self.f.close()
+        self.f.write(',')
         pass
 
     def process_item(self, item, spider):
         product = {
             'timestamp': item['timestamp'],
+            'RPC': self.get_RPC(item),
             'url': item['url'],
-            'title': item['title'],
+            'title': self.space_wings_fix_str(item['title']),
             'color': item['color'],
             'brand': item['brand'],
             'section': item['section'],
-            'price_current': self.get_price_info(item)[0],
-            'price_original': self.get_price_info(item)[1],
-            'discount':  self.get_price_info(item)[2],
+            'price_data': self.get_price_data(item),
             'in_stock': self.get_in_stock_info(item),
             'count': item['count'],
-            'main_image': item['main_image'],
-            'set_images': item['set_images'],
+            'assets': self.get_assets(item),
             'description': item['description'],
             'article': item['article'],
             'composition': item['composition'],
@@ -41,7 +39,7 @@ class WildberriesPipeline:
             'city': item['city']
         }
 
-        print(product['spec'])
+        # print(product['spec'])
 
         self.add_to_json(product)
 
@@ -59,23 +57,14 @@ class WildberriesPipeline:
             if len(keys_list) != len(values_list):
                 return 'mapping error'
             else:
-                # for key in keys_list:
-                #     i = keys_list.index(key)
-                #     for letter in key:
-                #         if letter == ' ':
-                #             keys_list[i] = key[1:]
-
-                for value in values_list:
-                    i = values_list.index(value)
-                    for letter in value:
-                        if letter == ' ':
-                            values_list[i] = value[1:]
+                keys_list = self.space_wings_fix_list(keys_list)
+                values_list = self.space_wings_fix_list(values_list)
 
                 spec = dict(zip(keys_list, values_list))
 
                 return spec
 
-    def get_price_info(self, item):
+    def get_price_data(self, item):
         price_current = item['price_current']
         price_original = item['price_original']
 
@@ -83,12 +72,15 @@ class WildberriesPipeline:
 
         if price_original is not None:
             price_original = float(price_original.replace(' ', '').replace('\xa0', '').replace('\n', '').replace('₽', ''))
-            discount = int((price_original - price_current) / price_original * 100)
         else:
             price_original = price_current
-            discount = 0
 
-        return [price_current, price_original, discount]
+        discount = int((price_original - price_current) / price_original * 100)
+
+        if discount != 0:
+            return {'current': price_current, 'original': price_original, 'sale_tag': f'Скидка {discount} %'}
+        else:
+            return {'current': price_current, 'original': price_original, 'sale_tag': 'Скидки нет'}
 
     def get_in_stock_info(self, item):
         in_stock = item['in_stock']
@@ -98,6 +90,46 @@ class WildberriesPipeline:
             in_stock = False
         return in_stock
 
+    def space_wings_fix_str(self, items_str):
+        if type(items_str) == str:
+            while len(items_str) > 0:
+                if items_str[0] == ' ':
+                    items_str = items_str[1:]
+                else:
+                    break
+            while len(items_str) > 0:
+                if items_str[-1] == ' ':
+                    items_str = items_str[:-1]
+                else:
+                    break
+        return items_str
+
+    def space_wings_fix_list(self, items_list):
+        if type(items_list) == list:
+            for item in items_list:
+                i = items_list.index(item)
+                items_list[i] = self.space_wings_fix_str(items_list[i])
+        return items_list
+
+    def get_assets(self, item):
+        set_images = item['set_images']
+
+        # set_images = list(map(lambda x: x.replace('//', ''), set_images))
+        set_images = list(map(lambda x: 'https:' + x, set_images))
+
+        main_image = set_images.pop(0)
+
+        return {'main_image': main_image, 'set_images': set_images}
+
+    def get_RPC(self, item):
+        RPC = item['tag_params']
+        RPC = RPC.replace('\xa0', '').replace('\n', '').replace(';', '')
+        RPC = RPC.split('=')[1]
+        RPC = eval(RPC)
+        RPC = str(RPC['ProdID'][0])
+        return RPC
+
     def __del__(self):
+        self.f.write(']')
         self.f.close()
         pass

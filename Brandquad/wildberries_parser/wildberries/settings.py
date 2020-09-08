@@ -44,7 +44,8 @@ COOKIES_ENABLED = True
 # DEFAULT_REQUEST_HEADERS = {
   # 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
   # 'Accept-Language': 'en',
-  # 'Path': '/geo/saveprefereduserlocation/77'
+  # 'Path': '/geo/saveprefereduserlocation/77',
+  # '__wbl': 'cityId%3D77%26regionId%3D77%26city%3D%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0%26phone%3D84957755505%26latitude%3D55%2C7247%26longitude%3D37%2C7882'
 # }
 
 # Enable or disable spider middlewares

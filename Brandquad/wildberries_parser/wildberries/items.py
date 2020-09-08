@@ -18,7 +18,6 @@ class WildberriesItem(scrapy.Item):
     price_original = scrapy.Field()
     in_stock = scrapy.Field()
     count = scrapy.Field()
-    main_image = scrapy.Field()
     set_images = scrapy.Field()
     description = scrapy.Field()
     article = scrapy.Field()
@@ -26,4 +25,5 @@ class WildberriesItem(scrapy.Item):
     keys_list = scrapy.Field()
     values_list = scrapy.Field()
     city = scrapy.Field()
+    tag_params = scrapy.Field()
     # pass
