@@ -15,6 +15,9 @@ if __name__ == '__main__':
     t1 = threading.Thread(target=print_rev_num, args=(count_from,))
     t2 = threading.Thread(target=print_rev_num, args=(count_from,))
 
+    t1.daemon = True
+    t2.daemon = True
+
     t1.start()
     t2.start()
 
