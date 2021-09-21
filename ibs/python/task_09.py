@@ -4,8 +4,8 @@ import time
 
 def print_rev_num(num):
     for i in range(num, 0, -1):
-        print("Current thread: ", format(threading.currentThread().getName()))
-        print(i)
+        print(f'Current thread: {threading.currentThread().getName()}\n'
+              f'Count = {i}')
         time.sleep(1)
 
 
@@ -17,3 +17,6 @@ if __name__ == '__main__':
 
     t1.start()
     t2.start()
+
+    t1.join()
+    t2.join()
